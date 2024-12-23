@@ -137,27 +137,8 @@ gopang_msa_without_oauth2-main/
 
 ### 1. **주문(Order) API 호출**  
 아래 스크린샷은 **Postman**에서 `OrderServer`의 주문 생성 API를 호출한 모습입니다.  
-<img width="1062" alt="스크린샷 2024-12-23 오전 11 36 42" src="https://github.com/user-attachments/assets/0a8def21-e867-4cb2-835a-79d16d402a29" />
 
-- **Request Body**  
-  ```json
-  {
-    "user_id": "9",
-    "ReqItemOrder": [
-      {
-        "itemId": 1,
-        "amount": 2
-      },
-      {
-        "itemId": 2,
-        "amount": 2
-      }
-    ],
-    "reciever_name": "서성원",
-    "reciever_phone": "01062789022",
-    ...
-  }
-  ```
+<img width="1062" alt="스크린샷 2024-12-23 오전 11 36 42" src="https://github.com/user-attachments/assets/0a8def21-e867-4cb2-835a-79d16d402a29" />
   - 유저 정보, 주문하려는 상품 목록, 수령인 정보 등을 JSON 형태로 전달
 
 ### 2. **분산 트레이싱(Zipkin) 화면**  
