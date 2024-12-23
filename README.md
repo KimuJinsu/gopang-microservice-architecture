@@ -102,56 +102,6 @@ gopang_msa_without_oauth2-main/
 
 ---
 
-## ⚙️ 각 마이크로서비스 상세 구조 예시
-
-#### ItemServer 예시
-
-```bash
-itemserver/
-├── src/
-│   ├── main/
-│   │   ├── java/com/example/item/
-│   │   │   ├── controller/    # 상품 관련 API 엔드포인트
-│   │   │   ├── service/       # 비즈니스 로직
-│   │   │   ├── repository/    # JPA or MyBatis Mapper 등
-│   │   │   └── domain/        # 엔티티 또는 VO 클래스
-│   │   └── resources/
-│   │       └── application.yml
-└── build.gradle
-```
-
----
-
-## 📊 DB 다이어그램 (예시)
-
-아래는 ItemServer, OrderServer, PaymentServer가 사용하는 DB의 예시 다이어그램입니다.  
-(실제 프로젝트와는 다를 수 있습니다.)
-
-```
-[ITEM_TABLE]
-- item_id (PK)
-- item_name
-- price
-- stock
-- ...
-
-[ORDER_TABLE]
-- order_id (PK)
-- user_id (FK -> USER_TABLE)
-- total_price
-- order_date
-- ...
-
-[PAYMENT_TABLE]
-- payment_id (PK)
-- order_id (FK -> ORDER_TABLE)
-- amount
-- status
-- ...
-```
-
----
-
 ## 🚀 주요 기능 및 특징
 
 1. **MSA 구조**  
@@ -187,44 +137,6 @@ itemserver/
 
 ---
 
-## 💻 실행 방법
-
-### 1. 사전 준비
-1. **Docker** 및 **Docker Compose** 설치
-2. **Java 11 이상** 또는 **OpenJDK** 설치
-3. (선택) **MySQL** 혹은 다른 DB 설치 (각 서버가 DB를 필요로 하는 경우)
-
-### 2. 환경 설정
-1. 각 마이크로서비스 `application.yml` 또는 `application.properties`에서 DB 연결 정보, 포트 등을 확인하세요.
-2. Config Server를 사용 시, `configserver` 디렉토리 내 설정을 수정해 주세요.
-3. 필요한 경우 **Eureka Server**나 **Gateway Server**의 포트를 변경해도 됩니다.
-
-### 3. 실행
-1. **Docker Compose로 실행**  
-   ```bash
-   cd docker-compose
-   docker-compose up -d
-   ```
-   - 모든 마이크로서비스가 컨테이너로 빌드 및 실행됩니다.
-   - `docker ps` 명령어로 서비스들이 정상적으로 실행 중인지 확인하세요.
-
-2. **개별 실행**(Gradle)  
-   ```bash
-   cd eurekaserver
-   ./gradlew bootRun
-
-   cd configserver
-   ./gradlew bootRun
-
-   cd gatewayserver
-   ./gradlew bootRun
-
-   ... (itemserver, orderserver, paymentserver 등도 동일)
-   ```
-   - 각 프로젝트 폴더에서 `bootRun`을 실행하여 개별적으로 마이크로서비스를 띄울 수 있습니다.
-
----
-
 ## 🛠️ 사용된 기술
 
 - **Spring Boot** / **Spring Cloud** (Eureka, Config, Gateway 등)
@@ -246,7 +158,6 @@ itemserver/
 ## 🛠️ 추가 참고
 
 - 현재 프로젝트는 **개발 및 테스트 단계**입니다.
-- 서비스 기능 확장 및 신규 마이크로서비스 추가 계획이 있으니, PR이나 Issue를 통해 언제든지 제안해 주세요!
 
 ---
 
