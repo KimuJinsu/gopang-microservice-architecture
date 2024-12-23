@@ -137,9 +137,7 @@ gopang_msa_without_oauth2-main/
 
 ### 1. **주문(Order) API 호출**  
 아래 스크린샷은 **Postman**에서 `OrderServer`의 주문 생성 API를 호출한 모습입니다.  
-
-![Order API Call via Postman](https://user-images.githubusercontent.com/xxxxxxx/postman_order_api.png)  
-<sup>(예시 이미지를 삽입해주세요)</sup>
+<img width="1062" alt="스크린샷 2024-12-23 오전 11 36 42" src="https://github.com/user-attachments/assets/0a8def21-e867-4cb2-835a-79d16d402a29" />
 
 - **Request Body**  
   ```json
@@ -165,7 +163,7 @@ gopang_msa_without_oauth2-main/
 ### 2. **분산 트레이싱(Zipkin) 화면**  
 아래는 `gopang-order` → `gopang-item` 간 API 호출 내역이 **Zipkin**에서 추적된 결과입니다.  
 
-![Zipkin Trace](https://user-images.githubusercontent.com/xxxxxxx/zipkin_trace.png)  
+<img width="1493" alt="스크린샷 2024-12-23 오전 11 36 56" src="https://github.com/user-attachments/assets/5c9aa024-16b1-48ca-8110-8b6b55d1b097" />
 <sup>(Zipkin에서 스팬(Span)들이 순차적으로 호출되는 모습)</sup>
 
 - **Span 정보**  
@@ -175,7 +173,7 @@ gopang_msa_without_oauth2-main/
 ### 3. **로그 수집(Kibana) 예시**  
 아래는 **Kibana** 대시보드에서 `gopang-gateway`, `gopang-order`, `gopang-item` 등의 로그가 수집된 모습입니다.
 
-![Kibana Logs](https://user-images.githubusercontent.com/xxxxxxx/kibana_logs.png)  
+<img width="1181" alt="스크린샷 2024-12-23 오전 11 37 13" src="https://github.com/user-attachments/assets/c931656e-abc8-4f2e-94c8-1e60bafcb059" />
 <sup>(ELK 스택 예시 화면: Logstash → Elasticsearch → Kibana)</sup>
 
 - **로그 레벨**: TRACE, INFO, ERROR 등  
