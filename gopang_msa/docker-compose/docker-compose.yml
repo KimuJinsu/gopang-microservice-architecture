@@ -1,0 +1,234 @@
+
+services:
+  database:
+    image: mariadb:latest
+    ports:
+      - "3307:3306" # 컨테이너 안 포트/호스트 시스템 외부 포트
+    networks:
+      backend:
+        aliases:
+          - "database"
+    environment:
+      MARIADB_DATABASE: "gopang"
+#      MARIADB_USER: "root"
+      MARIADB_PASSWORD: "1234"
+      MARIADB_ROOT_PASSWORD: "1234"
+
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 1m
+      timeout: 5s
+      retries: 3
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    ports:
+      - '21810:2181'
+    networks:
+      backend:
+        aliases:
+          - "zookeeper"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+
+  kafka:
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9092:9092'
+    networks:
+      backend:
+        aliases:
+          - "kafka"
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    depends_on:
+      - zookeeper
+
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - "9411:9411"
+    networks:
+      backend:
+        aliases:
+          - "zipkin-server"
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.7.0
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9300:9300
+      - 9200:9200
+    networks:
+      backend:
+        aliases:
+          - "elasticsearch"
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.7.0
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: "http://elasticsearch:9300"
+    ports:
+      - 5601:5601
+    networks:
+      backend:
+        aliases:
+          - "kibana"
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:7.7.0
+    container_name: logstash
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - ./config:/etc/logstash/conf.d
+    ports:
+      - "6000:6000"
+    networks:
+      backend:
+        aliases:
+          - "logstash"
+
+
+  gatewayserver:
+    image: gopang/gatewayserver:0.0.1-SNAPSHOT
+    ports:
+      - "8072:8072"
+    environment:
+      SERVER_PORT: "8072"
+      CONFIGSERVER_URI: "http://configserver:8071"
+      EUREKASERVER_URI: "http://eurekaserver:8070/eureka/"
+      EUREKASERVER_PORT: "8070"
+      CONFIGSERVER_PORT: "8071"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      eurekaserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "gatewayserver"
+
+  configserver:
+    image: gopang/configserver:0.0.1-SNAPSHOT
+    ports:
+      - "8071:8071"
+    networks:
+      backend:
+        aliases:
+          - "configserver"
+
+  eurekaserver:
+    image: gopang/eurekaserver:0.0.1-SNAPSHOT
+    ports:
+      - "8070:8070"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "eurekaserver"
+
+  gopangorders:
+    image: gopang/orderserver:0.0.2-SNAPSHOT
+    environment:
+      DATABASESERVER_PORT: "3306"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+      kafka:
+        condition: service_started
+    ports:
+      - "8082:8082"
+    networks:
+      - backend
+
+  gopangpayment:
+    image: gopang/paymentserver:0.0.1-SNAPSHOT
+    environment:
+      DATABASESERVER_PORT: "3306"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    ports:
+      - "8083:8083"
+    networks:
+      backend:
+        aliases:
+          - "gopangpayment"
+
+  gopangitems:
+    image: gopang/itemserver:0.0.1-SNAPSHOT
+    ports:
+      - "8081:8081"
+    depends_on:
+      database:
+        condition: service_healthy
+      configserver:
+        condition: service_started
+    networks:
+      backend:
+        aliases:
+          - "itemserver"
+  angular-app:
+    image: nginx-server:web-server
+    container_name: angular-app
+    build:
+      context: ../nginx-server
+      dockerfile: ../nginx-server/Dockerfile
+    ports:
+      - "80:80"
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml/:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    networks:
+      backend:
+        aliases:
+          - "prometheus"
+  grafana:
+    image: grafana/grafana
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    networks:
+      backend:
+        aliases:
+          - "grafana"
+
+volumes:
+  esdata1:
+    driver: local
+
+networks:
+  backend:
+    driver: bridge
